@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "bot-discord-lastwar"
+version = "0.1.0"
+description = ""
+authors = ["Calel"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+mkdocs = "^1.6.1"
+pydantic = "^2.11.7"
+pytest = "^8.4.1"
+mkdocs-material = "^9.6.15"
+python-dotenv = "^1.1.1"
+dotenv = "^0.9.9"
+taskipy = "^1.14.1"
+sentry-sdk = "^2.32.0"
+discord-py = "^2.5.2"
+bs4 = "^0.0.2"
+google-genai = "^1.25.0"
+pathlib = "^1.0.1"
+google-api-python-client = "^2.177.0"
+apache-airflow = "^3.0.3"
+google = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
