@@ -27,6 +27,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 # YouTube Data API
 
+
 def checks_existing_files():
     """
     Cria um agente LastWar que responde perguntas sobre o jogo Last War: Survival
@@ -178,7 +179,7 @@ def carrega_arquivos_como_fonte():
 
     arquivos = [file.name for file in caminho_pasta.iterdir() if file.is_file()]
     arquivos_carregados = []
-    client = genai.Client()
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
 
     for file in arquivos:
@@ -206,7 +207,7 @@ def criar_agente_last_war(question: str):
     #genai.configure(api_key=GEMINI_API_KEY)
     #client = genai.Client(api_key=GEMINI_API_KEY)
     #model = genai.GenerativeModel("gemini-2.5-flash")
-    #arquivos_existentes = list(client.files.list())
+    arquivos_existentes = list(client.files.list())
     #print(arquivos_existentes)
 
     # if not arquivos_existentes:
@@ -333,3 +334,6 @@ async def carregar_dados_cmd(ctx):
 
 if __name__ == "__main__":
     print("Bem-vindo ao Agente LastWar com Gemini!")
+    if DISCORD_TOKEN:
+       bot.run(DISCORD_TOKEN)
+    #extract_content_full_urls()
