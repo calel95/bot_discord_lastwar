@@ -50,7 +50,7 @@ def checks_existing_files():
     
 
 # Buscar vídeos de um canal
-def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=2):
+def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=None):
     """
     Processa vídeos do YouTube diretamente com Gemini e salva como arquivos de texto.
     
@@ -89,6 +89,25 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=2
             print(f"Erro ao buscar vídeos do canal: {e}")
             return
     
+    if video_urls:
+        # Aqui assume-se que você já sabe a URL do vídeo
+        for url in video_urls:
+            try:
+                # Se quiser buscar o título pela API:
+                youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
+                video_id = url.split('watch?v=')[1].split('&')[0]
+                request = youtube.videos().list(
+                    part='snippet',
+                    id=video_id
+                )
+                response = request.execute()
+                video_title = response['items'][0]['snippet']['title']
+                
+                video_list.append(url)
+                video_titles.append(video_title)
+            except Exception as e:
+                print(f"Erro ao buscar dados do vídeo: {e}")
+                return
     # Criar pasta para dados processados pelo Gemini
     #gemini_data_path = Path('./data/gemini_youtube')
     #gemini_data_path.mkdir(parents=True, exist_ok=True)
@@ -101,11 +120,8 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=2
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
                 contents=[
-                    "Analise este vídeo do YouTube e forneça um resumo detalhado do conteúdo, "
-                    "incluindo pontos principais, estratégias mencionadas, dicas importantes e "
-                    "qualquer informação relevante sobre Last War: Survival. "
-                    "Organize a informação de forma clara e estruturada:",
-                    video_url
+                    {"text": "Analise este vídeo do YouTube e forneça um resumo detalhado do conteúdo destacando os pontos principais"},
+                    {"file_data": {"mime_type": "text/plain", "file_uri": video_url}}
                 ],
                 config={
                     "temperature": 0.3,
@@ -115,7 +131,7 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=2
             # Extrair ID do vídeo da URL
             video_id = video_url.split('watch?v=')[1].split('&')[0] if 'watch?v=' in video_url else f"video_{video_title}"
             
-            filename = f"data/YOUTUBE-{video_titles[i]}_{video_id}.txt"
+            filename = f"data/YOUTUBE-{video_titles[i].replace("?","").replace("/","")}_{video_id}.txt"
             
             with open(filename, "w", encoding="utf-8") as arquivo:
                 arquivo.write(f"URL DO VÍDEO: {video_url}\n\n")
@@ -334,6 +350,7 @@ async def carregar_dados_cmd(ctx):
 
 if __name__ == "__main__":
     print("Bem-vindo ao Agente LastWar com Gemini!")
-    if DISCORD_TOKEN:
-       bot.run(DISCORD_TOKEN)
+    extract_content_video_youtube(video_urls=["https://www.youtube.com/watch?v=TsuUhPXOnI8"])
+    # if DISCORD_TOKEN:
+    #    bot.run(DISCORD_TOKEN)
     #extract_content_full_urls()
