@@ -83,64 +83,6 @@ def remover_todos_arquivos_gemini():
         client.files.delete(name=arquivo.name)
         print(f"Arquivo {arquivo.name} removido com sucesso!")
 
-intents = discord.Intents.default()
-intents.message_content = True
-intents.presences = True
-
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-@bot.event
-async def on_ready():
-    """Evento que é disparado quando o bot se conecta ao Discord."""
-    print(f'Bot logado como {bot.user.name} ({bot.user.id})')
-    print('Pronto para receber comandos!')
-
-
-@bot.event
-async def on_message(message):
-    """Evento que é disparado quando uma mensagem é enviada em qualquer canal."""
-    if message.author == bot.user:
-        return
-
-    if bot.user.mentioned_in(message) and not message.mention_everyone:
-        question = message.content.replace(f'<@{bot.user.id}>', '').strip()
-        if question:
-            await message.channel.send(f"Hi {message.author.mention}! Asked me: '{question}'")
-            await message.channel.send("I'm processing your question about Last War: Mobile...")
-
-            try:
-                # Use sua função de IA aqui
-                bot_answer = criar_agente_last_war(question=question)
-                await message.channel.send(f"{message.author.mention}, here is the answer: {bot_answer}")
-
-            except Exception as e:
-                await message.channel.send(f"Desculpe, {message.author.mention}, houve um erro ao processar sua pergunta: `{e}`")
-                print(f"Erro na IA: {e}")
-        return
-
-    await bot.process_commands(message)
-
-@bot.command(name='test')
-async def ping(ctx):
-    """
-    Comando de teste para verificar se o bot está online e respondendo.
-    Uso: !teste
-    """
-    await ctx.send('Bot in operation!!')
-
-@bot.command(name='check')
-async def carregar_dados_cmd(ctx):
-    """Comando para carregar os dados de Last War para o Gemini."""
-    await ctx.send("Checking sources...")
-    try:
-        x = int(checks_existing_files())
-        if x > 0:
-            await ctx.send(f"Arquives in data source.")
-        else:
-            await ctx.send("No files found in data source. Please request upload files first.")
-
-    except Exception as e:
-        await ctx.send(f"Erro ao checking sources: `{e}`")
 
 if __name__ == "__main__":
     print("Bem-vindo ao Agente LastWar com Gemini!")

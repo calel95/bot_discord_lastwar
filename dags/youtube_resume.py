@@ -22,8 +22,18 @@ load_dotenv()
 
 
 def youtube_resume_dag():
-    
-    # Define tasks
+    """
+    Recebe URL do youtube, onde a IA do Gemini irá fazer um resumo do vídeo e armazenar em um arquivo.txt na pasta /data.
+
+    Args:
+        video_urls: url[List]: URL do vídeo no Youtube, pode ser mais de uma.
+
+    Exemplo de args no Json de input do Airflow:
+        {
+    "url": "https://www.youtube.com/watch?v=3t9wD6ribps"
+}
+    """    
+
     @task
     def executar_resumo_youtube(dag_run: DagRun):
         from src.main import extract_content_video_youtube
