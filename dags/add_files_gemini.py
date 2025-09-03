@@ -25,7 +25,7 @@ def upload_gemini_files_dag():
     # Define tasks
     @task
     def upload_files_gemini():
-        from src.main import carrega_arquivos_como_fonte
+        from src.utils import carrega_arquivos_como_fonte
         carrega_arquivos_como_fonte()
 
     # Use dynamic task mapping to run the print_astronaut_craft task for each

@@ -22,7 +22,7 @@ def web_scraping_files_web_dag():
     # Define tasks
     @task
     def executar_extracao():
-        from src.main import extract_content_full_urls
+        from src.utils import extract_content_full_urls
         extract_content_full_urls()
 
     # Use dynamic task mapping to run the print_astronaut_craft task for each

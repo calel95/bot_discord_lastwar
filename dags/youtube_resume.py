@@ -36,7 +36,7 @@ def youtube_resume_dag():
 
     @task
     def executar_resumo_youtube(dag_run: DagRun):
-        from src.main import extract_content_video_youtube
+        from src.utils import extract_content_video_youtube
         if dag_run and dag_run.conf and "url" in dag_run.conf:
             url = dag_run.conf['url'] 
             print(f"URL recebida: {url}")

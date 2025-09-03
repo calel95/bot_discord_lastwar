@@ -24,17 +24,17 @@ def process_full_remove_extract_upload():
     # Define tasks
     @task
     def executar_remocao_arquivos_da_base_gemini():
-        from src.main import remover_todos_arquivos_gemini
+        from src.utils import remover_todos_arquivos_gemini
         remover_todos_arquivos_gemini()
 
     @task
     def executar_extracao():
-        from src.main import extract_content_full_urls
+        from src.utils import extract_content_full_urls
         extract_content_full_urls()
     
     @task
     def executar_envio_dos_arquivos_para_gemini():
-        from src.main import carrega_arquivos_como_fonte
+        from src.utils import carrega_arquivos_como_fonte
         carrega_arquivos_como_fonte()
     
     

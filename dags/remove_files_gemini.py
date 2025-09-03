@@ -23,7 +23,7 @@ def remove_gemini_files_dag():
     # Define tasks
     @task
     def executar_remocao():
-        from src.main import remover_todos_arquivos_gemini
+        from src.utils import remover_todos_arquivos_gemini
         remover_todos_arquivos_gemini()
 
     # Use dynamic task mapping to run the print_astronaut_craft task for each
