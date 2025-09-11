@@ -2,7 +2,7 @@ from airflow.decorators import dag, task
 from pendulum import datetime
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-
+import sentry_sdk
 
 load_dotenv()
 

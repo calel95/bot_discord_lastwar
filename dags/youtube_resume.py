@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import pendulum
 from airflow.models.dagrun import DagRun
-
+import sentry_sdk
 
 load_dotenv()
 

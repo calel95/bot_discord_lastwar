@@ -3,7 +3,7 @@ from pendulum import datetime
 from dotenv import load_dotenv
 from google import genai
 from datetime import datetime, timedelta
-
+import sentry_sdk
 
 load_dotenv()
 

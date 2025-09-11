@@ -2,6 +2,7 @@ from airflow.decorators import dag, task
 from pendulum import datetime
 from dotenv import load_dotenv
 from google import genai
+import sentry_sdk
 
 from datetime import datetime, timedelta
 import os

@@ -13,17 +13,34 @@ from discord.ext import commands
 from googleapiclient.discovery import build
 import time
 import asyncio
-
+import sentry_sdk
+from sentry_sdk import logger as sentry_logger
+import logging
 
 #print(dir(genai))
 # --- Configuração da API Key ---
 load_dotenv()
+
+
+sentry_sdk.init(
+    dsn="https://927c76673a5e9fbfde3db21373fadf6c@o4509353079865344.ingest.us.sentry.io/4509992552103936",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+    enable_logs=True,
+)
+
+
 
 #DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
+
+
 
 # YouTube Data API
 
@@ -41,7 +58,10 @@ def checks_existing_files():
     #client = genai.Client(api_key=GEMINI_API_KEY)
     arquivos_existentes = list(client.files.list())
 
-    print(f"Encontrados {len(arquivos_existentes)} arquivos carregados.")
+    #print(f"Encontrados {len(arquivos_existentes)} arquivos carregados.")
+    #sentry_sdk.capture_message(f"Encontrados {len(arquivos_existentes)} arquivos carregados.")
+    logging.info("Essa mensagem de log será enviada para o Sentry.")
+    
     #return print(f"Encontrados {len(arquivos_existentes)} arquivos carregados.")
 
     return len(arquivos_existentes)
@@ -85,7 +105,9 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
                 video_titles.append(video_title)
                 
         except Exception as e:
-            print(f"Erro ao buscar vídeos do canal: {e}")
+            #print(f"Erro ao buscar vídeos do canal: {e}")
+            sentry_logger.error(f"Erro ao buscar vídeos do canal: {e}")
+            #sentry_sdk.capture_message(f"Erro ao buscar vídeos do canal: {e}")
             return
     
     if video_urls:
@@ -105,7 +127,9 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
                 video_list.append(url)
                 video_titles.append(video_title)
             except Exception as e:
-                print(f"Erro ao buscar dados do vídeo: {e}")
+                #print(f"Erro ao buscar dados do vídeo: {e}")
+                sentry_logger.error(f"Erro ao buscar dados do vídeo: {e}")
+                #sentry_sdk.capture_message(f"Erro ao buscar dados do vídeo: {e}")
                 return
     # Criar pasta para dados processados pelo Gemini
     #gemini_data_path = Path('./data/gemini_youtube')
@@ -113,7 +137,9 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
     
     for i, video_url in enumerate(video_list):
         try:
-            print(f"Processando vídeo {video_url} - {video_titles[i]}")
+            #print(f"Processando vídeo {video_url} - {video_titles[i]}")
+            #sentry_sdk.capture_message(f"Processando vídeo {video_url} - {video_titles[i]}")
+            sentry_logger.info(f"Processando vídeo {video_url} - {video_titles[i]}")
             
             # Processar vídeo com Gemini
             response = client.models.generate_content(
@@ -137,13 +163,17 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
                 arquivo.write("CONTEÚDO PROCESSADO PELO GEMINI:\n\n")
                 arquivo.write(response.text)
             
-            print(f"Vídeo processado e salvo em: {filename}")
+            #print(f"Vídeo processado e salvo em: {filename}")
+            #sentry_sdk.capture_message(f"Vídeo processado e salvo em: {filename}")
+            sentry_logger.info(f"Vídeo processado e salvo em: {filename}")
             
             # Pausa para evitar rate limiting
             time.sleep(2)
             
         except Exception as e:
-            print(f"Erro ao processar vídeo {video_url}: {e}")
+            #print(f"Erro ao processar vídeo {video_url}: {e}")
+            sentry_logger.error(f"Erro ao processar vídeo {video_url}: {e}")
+            #sentry_sdk.capture_message(f"Erro ao processar vídeo {video_url}: {e}")
             continue
     
 
@@ -184,9 +214,11 @@ def extract_content_full_urls():
                 texto = section.get_text(strip=True)
                 if texto:  # evitar escrever vazios
                     arquivo.write(texto + "\n\n")
-                    #print(texto)  # se quiser ver o que está salvando
+                    #print(texto)  # se quiser ver o que está salvandoo
 
-        print(f"Arquivo '{nome_do_arquivo}' salvo com sucesso!")
+        #print(f"Arquivo '{nome_do_arquivo}' salvo com sucesso!")
+        #sentry_sdk.capture_message(f"Arquivo '{nome_do_arquivo}' salvo com sucesso!")
+        sentry_logger.info(f"Arquivo '{nome_do_arquivo}' salvo com sucesso!")
 
 def carrega_arquivos_como_fonte():
     
@@ -199,11 +231,15 @@ def carrega_arquivos_como_fonte():
 
     for file in arquivos:
         uploaded_file = client.files.upload(file=f"{caminho_pasta}/{file}", config={"mime_type": "text/plain"})
-        print(f"Arquivo {file} carregado como '{uploaded_file.name}'.  carregado com sucesso!")
+        #print(f"Arquivo {file} carregado como '{uploaded_file.name}'.  carregado com sucesso!")
+        sentry_logger.info(f"Arquivo {file} carregado como '{uploaded_file.name}'.  carregado com sucesso!")
+        #sentry_sdk.capture_message(f"Arquivo {file} carregado como '{uploaded_file.name}'.  carregado com sucesso!")
         #sys.stdout.flush()
         arquivos_carregados.append(uploaded_file)
 
-    print(f"Total de arquivos carregados: {len(arquivos_carregados)}")
+    #print(f"Total de arquivos carregados: {len(arquivos_carregados)}")
+    sentry_logger.info(f"Total de arquivos carregados: {len(arquivos_carregados)}")
+    #sentry_sdk.capture_message(f"Total de arquivos carregados: {len(arquivos_carregados)}")
 
     return arquivos_carregados
     
@@ -261,11 +297,16 @@ def criar_agente_last_war(question: str):
         )
 
         resposta_chat = response.text
-        print("\nResposta do Agente LastWar:")
-        print(resposta_chat)
-        print("-" * 50)
+        # print("\nResposta do Agente LastWar:")
+        # print(resposta_chat)
+        # print("-" * 50)
+
+        sentry_logger.info("\nResposta do Agente LastWar:")
+        sentry_logger.info(resposta_chat)
+        sentry_logger.info("-" * 50)
     except exceptions.PermissionDenied as e:
-        print(f"Erro de permissão ou arquivos fonrtes nao encontrados: {e}")
+        #print(f"Erro de permissão ou arquivos fonrtes nao encontrados: {e}")
+        sentry_logger.error(f"Erro de permissão ou arquivos fonrtes nao encontrados: {e}")
         resposta_chat = "Sorry, missing permission or files not found in source."
 
     #print(count_tokens.usage_metadata)
@@ -278,7 +319,9 @@ def remover_todos_arquivos_gemini():
     """
     client = genai.Client(api_key=GEMINI_API_KEY)
     arquivos = list(client.files.list())
-    print(f"Encontrados {len(arquivos)} arquivos...")
+    #print(f"Encontrados {len(arquivos)} arquivos...")
+    #sentry_sdk.capture_message(f"Encontrados {len(arquivos)} arquivos...")
+    sentry_logger.info(f"Encontrados {len(arquivos)} arquivos...")
     # for arquivo in arquivos:
     #     print(arquivo.name)
 
@@ -286,7 +329,9 @@ def remover_todos_arquivos_gemini():
     # if confirmacao.lower() == 's':
     for arquivo in arquivos:
         client.files.delete(name=arquivo.name)
-        print(f"Arquivo {arquivo.name} removido com sucesso!")
+        #sentry_sdk.capture_message(f"Arquivo {arquivo.name} removido com sucesso!")
+        sentry_logger.info(f"Arquivo {arquivo.name} removido com sucesso!")
+        #print(f"Arquivo {arquivo.name} removido com sucesso!")
 
 def user_add_source_data(file_name_input, message):
     with open(f"data/{file_name_input}.txt", "a", encoding="utf-8") as arquivo:

@@ -4,6 +4,9 @@ import discord
 from discord.ext import commands
 from utils import criar_agente_last_war, user_add_source_data, checks_existing_files
 import logging
+import sentry_sdk
+from sentry_sdk import logger as sentry_logger
+
 
 load_dotenv()
 
@@ -17,7 +20,8 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    logging.info(f'Bot logado como {bot.user.name} ({bot.user.id})')
+    #logging.info(f'Bot logado como {bot.user.name} ({bot.user.id})')
+    #sentry_sdk.capture_message(f'Bot logado como {bot.user.name} ({bot.user.id})')
     print('Pronto para receber comandos!')
 
 @bot.event
@@ -78,6 +82,5 @@ async def input_cmd(ctx, file_name):
         await ctx.send(f'Error or timeout: {e}')
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     if DISCORD_TOKEN:
         bot.run(DISCORD_TOKEN)
