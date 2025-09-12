@@ -38,7 +38,10 @@ async def on_message(message):
             try:
                 # Utiliza a função da IA importada
                 bot_answer = criar_agente_last_war(question=question)
-                await message.channel.send(f"{message.author.mention}, here is the answer: {bot_answer}")
+                #sentry_logger.info(bot_answer)
+                #await message.channel.send(f"{message.author.mention}, here is the answer: {bot_answer}")
+                for part in bot_answer:
+                    await message.channel.send(part)
 
             except Exception as e:
                 await message.channel.send(f"Desculpe, {message.author.mention}, houve um erro ao processar sua pergunta: `{e}`")

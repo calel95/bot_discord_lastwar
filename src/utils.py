@@ -310,8 +310,21 @@ def criar_agente_last_war(question: str):
         resposta_chat = "Sorry, missing permission or files not found in source."
 
     #print(count_tokens.usage_metadata)
+    resposta_teste = "Eu quero que seja separado essa resposta em partes"
 
-    return resposta_chat
+    if len(resposta_chat) <= 1000:
+        return [resposta_chat]
+    else:
+        #return [resposta_chat[i:i+1950] for i in range(0, len(resposta_chat), 1950)]
+        pedacos = []
+
+        for i in range(0, len(resposta_chat), 1000):
+            pedaco = resposta_chat[i:i+1000]
+            pedacos.append(pedaco)
+        return pedacos
+        
+
+    #return resposta_chat
 def remover_todos_arquivos_gemini():
     """
     Remove todos os arquivos carregados no Gemini File API.
@@ -342,4 +355,8 @@ if __name__ == "__main__":
     # extract_content_video_youtube(video_urls=["https://www.youtube.com/watch?v=TsuUhPXOnI8"])
     # if DISCORD_TOKEN:
     #    bot.run(DISCORD_TOKEN)
-    user_add_source_data("user_data", "This is a test message added by the user.")
+    #user_add_source_data("user_data", "This is a test message added by the user.")
+    # x = criar_agente_last_war(question="What is Last War: Survival about?")
+    # for part in x:
+    #     print(part)
+
