@@ -312,14 +312,14 @@ def criar_agente_last_war(question: str):
     #print(count_tokens.usage_metadata)
     resposta_teste = "Eu quero que seja separado essa resposta em partes"
 
-    if len(resposta_chat) <= 1000:
+    if len(resposta_chat) <= 1900:
         return [resposta_chat]
     else:
         #return [resposta_chat[i:i+1950] for i in range(0, len(resposta_chat), 1950)]
         pedacos = []
 
-        for i in range(0, len(resposta_chat), 1000):
-            pedaco = resposta_chat[i:i+1000]
+        for i in range(0, len(resposta_chat), 1900):
+            pedaco = resposta_chat[i:i+1900]
             pedacos.append(pedaco)
         return pedacos
         
