@@ -35,6 +35,7 @@ async def on_message(message):
             await message.channel.send(f"Hi {message.author.mention}! Asked me: '{question}'")
             await message.channel.send("I'm processing your question about Last War: Mobile...")
 
+#TODO: Validar o envio da resposta em partes
             try:
                 # Utiliza a função da IA importada
                 bot_answer = criar_agente_last_war(question=question)
