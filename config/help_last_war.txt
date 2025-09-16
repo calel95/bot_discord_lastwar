@@ -1,0 +1,20 @@
+Bot Last War
+--------------------------
+Usage:
+    in all calls to the bot, it is necessary to call it using @
+
+Example:
+    @bot_last_war briefly explain to me how the professions of the first season work
+
+--------------------------
+
+Some special command options:
+Options:
+    !aid           Shows this help message
+    !check          Checks if the AI database is loaded
+    !test           Returns only a message informing that the bot is active
+    !input          Adds new information to the AI database; at the moment when adding new information it will not be available immediately, you need to wait for the upload processing window. The character limit for input on Discord is 2000 characters.
+
+Example of using !input:
+    !input <title_for_submission>
+    <message_to_be_sent>

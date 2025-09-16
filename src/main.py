@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import discord
 from discord.ext import commands
-from utils import criar_agente_last_war, user_add_source_data, checks_existing_files
+from utils import criar_agente_last_war, user_add_source_data, checks_existing_files, help_last_war
 import logging
 import sentry_sdk
 from sentry_sdk import logger as sentry_logger
@@ -69,6 +69,13 @@ async def carregar_dados_cmd(ctx):
 @bot.command(name='test')
 async def ping(ctx):
     await ctx.send('Bot in operation!!')
+
+@bot.command(name='aid')
+async def help_commands(ctx):
+    help_text = help_last_war()
+    await ctx.send(help_text)
+    #await ctx.send(f"Hi! File name is : '{file_name}'")
+    #await ctx.send(f"Type the content to add to the database")
 
 @bot.command(name='input')
 async def input_cmd(ctx, file_name):

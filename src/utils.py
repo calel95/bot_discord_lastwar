@@ -46,40 +46,32 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 def checks_existing_files():
     """
-    Cria um agente LastWar que responde perguntas sobre o jogo Last War: Survival
-    usando a API Gemini.
-    A função espera que os dados de base já estejam carregados no Gemini File API. Qualquer coisa enviar os dados local antes
-    Args:
-        campo (str): A pergunta do usuário.
+    Faz a checagem se existe arquivos carregados no Gemini File API.
     Returns:
-        str: A resposta gerada pelo agente Gemini.
+        int: A quantidade de arquivos no Gemini File API.
     """
 
-    #client = genai.Client(api_key=GEMINI_API_KEY)
     arquivos_existentes = list(client.files.list())
 
-    #print(f"Encontrados {len(arquivos_existentes)} arquivos carregados.")
-    #sentry_sdk.capture_message(f"Encontrados {len(arquivos_existentes)} arquivos carregados.")
     logging.info("Essa mensagem de log será enviada para o Sentry.")
     
-    #return print(f"Encontrados {len(arquivos_existentes)} arquivos carregados.")
 
     return len(arquivos_existentes)
     
     
 
 # Buscar vídeos de um canal
-def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=None):
+def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=5):
     """
     Processa vídeos do YouTube diretamente com Gemini e salva como arquivos de texto.
     
     Args:
         channel_id (str): ID do canal (opcional)
         video_urls (list): Lista de URLs de vídeos específicos (opcional)
-        max_videos (int): Número máximo de vídeos para processar do canal
+        max_videos (int): Número máximo de vídeos para processar do canal, se tiver channel_id (padrão: 5)
+    Returns:
+        None, os arquivos são salvos na pasta 'data' com prefixo YOUTUBE-
     """
-    #GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    #client = genai.Client(api_key=GEMINI_API_KEY)
     
     video_list = []
     video_titles = []
@@ -105,9 +97,7 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
                 video_titles.append(video_title)
                 
         except Exception as e:
-            #print(f"Erro ao buscar vídeos do canal: {e}")
             sentry_logger.error(f"Erro ao buscar vídeos do canal: {e}")
-            #sentry_sdk.capture_message(f"Erro ao buscar vídeos do canal: {e}")
             return
     
     if video_urls:
@@ -127,9 +117,7 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
                 video_list.append(url)
                 video_titles.append(video_title)
             except Exception as e:
-                #print(f"Erro ao buscar dados do vídeo: {e}")
                 sentry_logger.error(f"Erro ao buscar dados do vídeo: {e}")
-                #sentry_sdk.capture_message(f"Erro ao buscar dados do vídeo: {e}")
                 return
     # Criar pasta para dados processados pelo Gemini
     #gemini_data_path = Path('./data/gemini_youtube')
@@ -137,8 +125,6 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
     
     for i, video_url in enumerate(video_list):
         try:
-            #print(f"Processando vídeo {video_url} - {video_titles[i]}")
-            #sentry_sdk.capture_message(f"Processando vídeo {video_url} - {video_titles[i]}")
             sentry_logger.info(f"Processando vídeo {video_url} - {video_titles[i]}")
             
             # Processar vídeo com Gemini
@@ -163,8 +149,6 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
                 arquivo.write("CONTEÚDO PROCESSADO PELO GEMINI:\n\n")
                 arquivo.write(response.text)
             
-            #print(f"Vídeo processado e salvo em: {filename}")
-            #sentry_sdk.capture_message(f"Vídeo processado e salvo em: {filename}")
             sentry_logger.info(f"Vídeo processado e salvo em: {filename}")
             
             # Pausa para evitar rate limiting
@@ -179,7 +163,7 @@ def extract_content_video_youtube(channel_id=None, video_urls=None, max_videos=N
 
 def extract_content_full_urls():
     """
-    Extrai conteúdo de URLs do site Last War Tutorial e salva em arquivos de texto.
+    Extrai conteúdo de URLs do site Last War Tutorial e salva em arquivos de texto localmente.
     """
     base_url = "https://www.lastwartutorial.com"
     response = requests.get(base_url)
@@ -189,13 +173,10 @@ def extract_content_full_urls():
     for a_tag in soup.find_all("a", href=True):
         href = a_tag['href']
         # Filtrar apenas links internos relevantes do menu
-    #if any(section in href for section in ['heroes', 'squads', 'buildings']):
         full_url = urljoin(base_url, href)
         if  ".com/" in full_url and not "#" in full_url and not "play.google.com" in full_url and not "apps.apple.com" in full_url:
-            #print(full_url)
             menu_links.append(full_url)
 
-    #print(menu_links)
     if not os.path.exists("data"):
         os.makedirs("data")
 
@@ -214,13 +195,13 @@ def extract_content_full_urls():
                 texto = section.get_text(strip=True)
                 if texto:  # evitar escrever vazios
                     arquivo.write(texto + "\n\n")
-                    #print(texto)  # se quiser ver o que está salvandoo
 
-        #print(f"Arquivo '{nome_do_arquivo}' salvo com sucesso!")
-        #sentry_sdk.capture_message(f"Arquivo '{nome_do_arquivo}' salvo com sucesso!")
         sentry_logger.info(f"Arquivo '{nome_do_arquivo}' salvo com sucesso!")
 
 def carrega_arquivos_como_fonte():
+    """
+    Carrega arquivos de texto da pasta 'data' para o Gemini File API.
+    """
     
     caminho_pasta = Path('./data')
 
@@ -231,48 +212,26 @@ def carrega_arquivos_como_fonte():
 
     for file in arquivos:
         uploaded_file = client.files.upload(file=f"{caminho_pasta}/{file}", config={"mime_type": "text/plain"})
-        #print(f"Arquivo {file} carregado como '{uploaded_file.name}'.  carregado com sucesso!")
+
         sentry_logger.info(f"Arquivo {file} carregado como '{uploaded_file.name}'.  carregado com sucesso!")
-        #sentry_sdk.capture_message(f"Arquivo {file} carregado como '{uploaded_file.name}'.  carregado com sucesso!")
-        #sys.stdout.flush()
         arquivos_carregados.append(uploaded_file)
 
-    #print(f"Total de arquivos carregados: {len(arquivos_carregados)}")
     sentry_logger.info(f"Total de arquivos carregados: {len(arquivos_carregados)}")
-    #sentry_sdk.capture_message(f"Total de arquivos carregados: {len(arquivos_carregados)}")
 
     return arquivos_carregados
     
-
 def criar_agente_last_war(question: str):
     """
     Cria um agente LastWar que responde perguntas sobre o jogo Last War: Survival
     usando a API Gemini.
     A função espera que os dados de base já estejam carregados no Gemini File API. Qualquer coisa enviar os dados local antes
     Args:
-        campo (str): A pergunta do usuário.
+        question (str): A pergunta do usuário.
     Returns:
-        str: A resposta gerada pelo agente Gemini.
+        str: A resposta gerada pelo agente Gemini em partes se maior que 1900 caracteres.
     """
-    #GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    #genai.configure(api_key=GEMINI_API_KEY)
-    #client = genai.Client(api_key=GEMINI_API_KEY)
-    #model = genai.GenerativeModel("gemini-2.5-flash")
     arquivos_existentes = list(client.files.list())
-    #print(arquivos_existentes)
 
-    # if not arquivos_existentes:
-    #     print("Nenhum arquivo carregado. Carregando arquivos...")
-    #     arquivos_existentes = carrega_arquivos_como_fonte()
-
-    #print(f"Encontrados {len(arquivos_existentes)} arquivos carregados.")
-    #question = input("Digite sua pergunta sobre LastWar: ")
-
-    # prompt = (
-    #     "Você é um especialista em Last War: Survival. "
-    #     "Responda baseado APENAS nas informações dos documentos fornecidos. "
-    #     f"Pergunta: {question}"
-    # )
 
     try:
         prompt = (
@@ -283,9 +242,6 @@ def criar_agente_last_war(question: str):
 
         content_parts = [prompt] + arquivos_existentes
 
-    #     count_tokens = client.models.generate_content(
-    #     model="gemini-2.5-flash", contents=prompt
-    # )
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
@@ -297,19 +253,14 @@ def criar_agente_last_war(question: str):
         )
 
         resposta_chat = response.text
-        # print("\nResposta do Agente LastWar:")
-        # print(resposta_chat)
-        # print("-" * 50)
 
         sentry_logger.info("\nResposta do Agente LastWar:")
         sentry_logger.info(resposta_chat)
         sentry_logger.info("-" * 50)
     except exceptions.PermissionDenied as e:
-        #print(f"Erro de permissão ou arquivos fonrtes nao encontrados: {e}")
         sentry_logger.error(f"Erro de permissão ou arquivos fonrtes nao encontrados: {e}")
         resposta_chat = "Sorry, missing permission or files not found in source."
 
-    #print(count_tokens.usage_metadata)
     resposta_teste = "Eu quero que seja separado essa resposta em partes"
 
     if len(resposta_chat) <= 1900:
@@ -328,30 +279,29 @@ def criar_agente_last_war(question: str):
 def remover_todos_arquivos_gemini():
     """
     Remove todos os arquivos carregados no Gemini File API.
-    Ação requer confirmação do usuário no console.
     """
     client = genai.Client(api_key=GEMINI_API_KEY)
     arquivos = list(client.files.list())
-    #print(f"Encontrados {len(arquivos)} arquivos...")
-    #sentry_sdk.capture_message(f"Encontrados {len(arquivos)} arquivos...")
     sentry_logger.info(f"Encontrados {len(arquivos)} arquivos...")
-    # for arquivo in arquivos:
-    #     print(arquivo.name)
 
-    # confirmacao = input("Deseja remover todos os arquivos? (s/n): ")
-    # if confirmacao.lower() == 's':
+
     for arquivo in arquivos:
         client.files.delete(name=arquivo.name)
-        #sentry_sdk.capture_message(f"Arquivo {arquivo.name} removido com sucesso!")
         sentry_logger.info(f"Arquivo {arquivo.name} removido com sucesso!")
-        #print(f"Arquivo {arquivo.name} removido com sucesso!")
 
 def user_add_source_data(file_name_input, message):
     with open(f"data/{file_name_input}.txt", "a", encoding="utf-8") as arquivo:
         arquivo.write(message + "\n\n")
 
+def help_last_war():
+    with open("config/help_last_war.txt", "r", encoding="utf-8") as arquivo:
+        conteudo = arquivo.read()
+        #print(conteudo)
+    return conteudo
+
 if __name__ == "__main__":
     print("Bem-vindo ao Agente LastWar com Gemini!")
+    #help_last_war()
     # extract_content_video_youtube(video_urls=["https://www.youtube.com/watch?v=TsuUhPXOnI8"])
     # if DISCORD_TOKEN:
     #    bot.run(DISCORD_TOKEN)
