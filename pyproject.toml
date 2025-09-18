@@ -22,6 +22,7 @@ pathlib = "^1.0.1"
 google-api-python-client = "^2.177.0"
 apache-airflow = "^3.0.3"
 google = "^3.0.0"
+openai = "^1.108.0"
 
 [build-system]
 requires = ["poetry-core"]

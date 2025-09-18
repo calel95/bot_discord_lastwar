@@ -294,7 +294,7 @@ def user_add_source_data(file_name_input, message):
         arquivo.write(message + "\n\n")
 
 def help_last_war():
-    with open("config/help_last_war.txt", "r", encoding="utf-8") as arquivo:
+    with open("docs/help_last_war.txt", "r", encoding="utf-8") as arquivo:
         conteudo = arquivo.read()
         #print(conteudo)
     return conteudo
