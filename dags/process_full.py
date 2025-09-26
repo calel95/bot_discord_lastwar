@@ -4,7 +4,10 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from google import genai
 import sentry_sdk
+from sentry_sdk import logger as sentry_logger
+from sentry_sdk.integrations.logging import LoggingIntegration
 import os
+import logging
 
 
 load_dotenv()

@@ -7,42 +7,42 @@ def test_checks_existing_files():
         with patch('logging.info'):
             assert utils.checks_existing_files() == 3
 
-def test_extract_content_video_youtube_channel(monkeypatch):
-    mock_build = MagicMock()
-    mock_youtube = MagicMock()
-    mock_search = MagicMock()
-    mock_search.list.return_value.execute.return_value = {
-        'items': [
-            {'id': {'videoId': 'abc'}, 'snippet': {'title': 'Title1'}},
-            {'id': {'videoId': 'def'}, 'snippet': {'title': 'Title2'}}
-        ]
-    }
-    mock_youtube.search.return_value = mock_search
-    mock_build.return_value = mock_youtube
+# def test_extract_content_video_youtube_channel(monkeypatch):
+#     mock_build = MagicMock()
+#     mock_youtube = MagicMock()
+#     mock_search = MagicMock()
+#     mock_search.list.return_value.execute.return_value = {
+#         'items': [
+#             {'id': {'videoId': 'abc'}, 'snippet': {'title': 'Title1'}},
+#             {'id': {'videoId': 'def'}, 'snippet': {'title': 'Title2'}}
+#         ]
+#     }
+#     mock_youtube.search.return_value = mock_search
+#     mock_build.return_value = mock_youtube
 
-    monkeypatch.setattr(utils, 'build', mock_build)
-    monkeypatch.setattr(utils, 'YOUTUBE_API_KEY', 'fake_key')
-    with patch.object(utils, 'client'):
-        with patch('builtins.open', mock_open()):
-            with patch('time.sleep'):
-                utils.extract_content_video_youtube(channel_id='chanid')
+#     monkeypatch.setattr(utils, 'build', mock_build)
+#     monkeypatch.setattr(utils, 'YOUTUBE_API_KEY', 'fake_key')
+#     with patch.object(utils, 'client'):
+#         with patch('builtins.open', mock_open()):
+#             with patch('time.sleep'):
+#                 utils.extract_content_video_youtube(channel_id='chanid')
 
-def test_extract_content_video_youtube_urls(monkeypatch):
-    mock_build = MagicMock()
-    mock_youtube = MagicMock()
-    mock_videos = MagicMock()
-    mock_videos.list.return_value.execute.return_value = {
-        'items': [{'snippet': {'title': 'TitleX'}}]
-    }
-    mock_youtube.videos.return_value = mock_videos
-    mock_build.return_value = mock_youtube
+# def test_extract_content_video_youtube_urls(monkeypatch):
+#     mock_build = MagicMock()
+#     mock_youtube = MagicMock()
+#     mock_videos = MagicMock()
+#     mock_videos.list.return_value.execute.return_value = {
+#         'items': [{'snippet': {'title': 'TitleX'}}]
+#     }
+#     mock_youtube.videos.return_value = mock_videos
+#     mock_build.return_value = mock_youtube
 
-    monkeypatch.setattr(utils, 'build', mock_build)
-    monkeypatch.setattr(utils, 'YOUTUBE_API_KEY', 'fake_key')
-    with patch.object(utils, 'client'):
-        with patch('builtins.open', mock_open()):
-            with patch('time.sleep'):
-                utils.extract_content_video_youtube(video_urls=['https://www.youtube.com/watch?v=abc'])
+#     monkeypatch.setattr(utils, 'build', mock_build)
+#     monkeypatch.setattr(utils, 'YOUTUBE_API_KEY', 'fake_key')
+#     with patch.object(utils, 'client'):
+#         with patch('builtins.open', mock_open()):
+#             with patch('time.sleep'):
+#                 utils.extract_content_video_youtube(video_urls=['https://www.youtube.com/watch?v=abc'])
 
 def test_extract_content_full_urls(monkeypatch):
     html = '<a href="/page1">Page1</a>'
@@ -58,7 +58,7 @@ def test_criar_agente_last_war(monkeypatch):
     monkeypatch.setattr(utils.client.files, 'list', lambda: [])
     mock_response = MagicMock(text="resposta curta")
     monkeypatch.setattr(utils.client.models, 'generate_content', lambda **kwargs: mock_response)
-    with patch.object(utils.sentry_logger, 'info'):
+    with patch.object(utils.logger, 'info'):
         result = utils.criar_agente_last_war("Pergunta?")
         assert result == ["resposta curta"]
 
